@@ -53,7 +53,6 @@ export async function POST(request: Request) {
 
     if (records.result.length > 0) {
       const recordId = records.result[0].id;
-      // Update existing record explicitly
       await cloudflare.dns.records.update(recordId, {
         zone_id: process.env.CLOUDFLARE_ZONE_ID,
         type: 'A',
@@ -64,7 +63,6 @@ export async function POST(request: Request) {
       });
       console.log(`Updated existing DNS record ${recordId}`);
     } else {
-      // Create new record explicitly
       await cloudflare.dns.records.create({
         zone_id: process.env.CLOUDFLARE_ZONE_ID,
         type: 'A',
@@ -81,4 +79,6 @@ export async function POST(request: Request) {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Cloudflare API Error:', errorMessage);
-    return NextResponse.json({ message: 'Failed to update DNS.',
+    return NextResponse.json({ message: 'Failed to update DNS.', error: errorMessage }, { status: 500 });
+  }
+}
