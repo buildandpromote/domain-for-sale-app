@@ -36,7 +36,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Server configuration error.' }, { status: 500 });
   }
 
-  const cloudflare = new Cloudflare({ token: process.env.CLOUDFLARE_API_TOKEN });
+  const cloudflare = new Cloudflare({
+    apiToken: process.env.CLOUDFLARE_API_TOKEN, // This line is corrected
+  });
 
   try {
     console.log(`Updating DNS for ${domain}...`);
