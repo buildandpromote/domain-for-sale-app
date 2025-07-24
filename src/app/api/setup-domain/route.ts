@@ -24,9 +24,10 @@ export async function POST(request: Request) {
       throw upsertError;
     }
     console.log(`Successfully upserted data for ${domain} to Supabase.`);
-  } catch (error: any) {
-    console.error('Supabase Error:', error.message);
-    return NextResponse.json({ message: 'Failed to save data.', error: error.message }, { status: 500 });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Supabase Error:', errorMessage);
+    return NextResponse.json({ message: 'Failed to save data.', error: errorMessage }, { status: 500 });
   }
   
   // --- 2. Update Cloudflare DNS ---
@@ -66,8 +67,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: `Successfully updated DNS for ${domain}` }, { status: 200 });
 
-  } catch (error: any) {
-    console.error('Cloudflare API Error:', error.message);
-    return NextResponse.json({ message: 'Failed to update DNS.', error: error.message }, { status: 500 });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Cloudflare API Error:', errorMessage);
+    return NextResponse.json({ message: 'Failed to update DNS.', error: errorMessage }, { status: 500 });
   }
 }
