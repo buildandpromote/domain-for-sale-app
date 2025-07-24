@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   }
 
   const cloudflare = new Cloudflare({
-    apiToken: process.env.CLOUDFLARE_API_TOKEN, // This line is corrected
+    apiToken: process.env.CLOUDFLARE_API_TOKEN,
   });
 
   try {
@@ -50,20 +50,29 @@ export async function POST(request: Request) {
     });
 
     const vercelIp = process.env.VERCEL_IP_ADDRESS || '76.76.21.21';
-    const recordData = {
-      name: domain,
-      type: 'A',
-      content: vercelIp,
-      proxied: true,
-      ttl: 1,
-    };
 
     if (records.result.length > 0) {
       const recordId = records.result[0].id;
-      await cloudflare.dns.records.update(recordId, { ...recordData, zone_id: process.env.CLOUDFLARE_ZONE_ID });
+      // Update existing record explicitly
+      await cloudflare.dns.records.update(recordId, {
+        zone_id: process.env.CLOUDFLARE_ZONE_ID,
+        type: 'A',
+        name: domain,
+        content: vercelIp,
+        proxied: true,
+        ttl: 1,
+      });
       console.log(`Updated existing DNS record ${recordId}`);
     } else {
-      await cloudflare.dns.records.create({ ...recordData, zone_id: process.env.CLOUDFLARE_ZONE_ID });
+      // Create new record explicitly
+      await cloudflare.dns.records.create({
+        zone_id: process.env.CLOUDFLARE_ZONE_ID,
+        type: 'A',
+        name: domain,
+        content: vercelIp,
+        proxied: true,
+        ttl: 1,
+      });
       console.log('Created new DNS record.');
     }
 
@@ -72,6 +81,4 @@ export async function POST(request: Request) {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Cloudflare API Error:', errorMessage);
-    return NextResponse.json({ message: 'Failed to update DNS.', error: errorMessage }, { status: 500 });
-  }
-}
+    return NextResponse.json({ message: 'Failed to update DNS.',
