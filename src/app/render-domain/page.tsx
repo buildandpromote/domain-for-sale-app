@@ -1,23 +1,17 @@
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
-// This page will not be cached
 export const revalidate = 0;
 
 export default async function RenderDomainPage() {
   const headersList = await headers();
   const domainName = headersList.get('host');
 
-  // DEBUG: Log the domain we're looking for
-  console.log('Domain being looked up:', domainName);
-
-  // Initialize Supabase client
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  // Fetch data for the current domain
   const { data, error } = await supabase
     .from('domains')
     .select('price, contact_email')
@@ -25,17 +19,21 @@ export default async function RenderDomainPage() {
     .single();
 
   if (error || !data) {
-    // DEBUG: Log the error from Supabase
-    console.error('Supabase error:', error);
-
+    // Display debug info directly on the page
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-24">
-        <h1 className="text-4xl font-bold">Error</h1>
-        <p className="mt-4">This domain is not configured correctly.</p>
+      <main className="flex min-h-screen flex-col items-center justify-center p-12 font-mono">
+        <div className="w-full max-w-2xl rounded bg-red-100 p-6 text-red-900">
+          <h1 className="text-xl font-bold">Error: Domain Not Configured</h1>
+          <p className="mt-4">The application tried to look up the following domain:</p>
+          <pre className="mt-2 rounded bg-red-200 p-2"><code>{domainName}</code></pre>
+          <p className="mt-4">It failed with the following error from the database:</p>
+          <pre className="mt-2 rounded bg-red-200 p-2"><code>{JSON.stringify(error, null, 2) || "No specific error message."}</code></pre>
+        </div>
       </main>
     );
   }
 
+  // ... (The rest of the successful page rendering code remains the same)
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-12 bg-gray-50 text-center">
       <div className="w-full max-w-2xl">
