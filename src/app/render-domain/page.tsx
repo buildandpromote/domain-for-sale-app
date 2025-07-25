@@ -8,6 +8,9 @@ export default async function RenderDomainPage() {
   const headersList = await headers();
   const domainName = headersList.get('host');
 
+  // DEBUG: Log the domain we're looking for
+  console.log('Domain being looked up:', domainName);
+
   // Initialize Supabase client
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,6 +25,9 @@ export default async function RenderDomainPage() {
     .single();
 
   if (error || !data) {
+    // DEBUG: Log the error from Supabase
+    console.error('Supabase error:', error);
+
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-24">
         <h1 className="text-4xl font-bold">Error</h1>
