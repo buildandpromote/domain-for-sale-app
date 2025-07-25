@@ -15,9 +15,6 @@ export const config = {
 export function middleware(req: NextRequest) {
   const url = req.nextUrl;
   const hostname = req.headers.get('host')!;
-
-  // Your main app runs on this host
-  const appHost = new URL(process.env.NEXT_PUBLIC_VERCEL_URL || 'http://localhost:3000').hostname;
   
   // Handle requests to the admin panel
   if (url.pathname.startsWith('/admin')) {
@@ -35,12 +32,12 @@ export function middleware(req: NextRequest) {
     });
   }
 
-  // If the request is for a custom domain, rewrite to our render page
-  if (hostname !== appHost) {
-    url.pathname = `/render-domain`;
-    return NextResponse.rewrite(url);
+  // If the hostname ends with a vercel.app suffix, it's the main app, not a custom domain
+  if (hostname.endsWith('.vercel.app')) {
+    return NextResponse.next();
   }
 
-  // Allow all other requests to go through
-  return NextResponse.next();
+  // Otherwise, rewrite to our render page for custom domains
+  url.pathname = `/render-domain`;
+  return NextResponse.rewrite(url);
 }
