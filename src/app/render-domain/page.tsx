@@ -2,7 +2,7 @@ import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { Metadata } from 'next';
 
-// This new function sets the page title
+// This function sets the page title dynamically
 export async function generateMetadata(): Promise<Metadata> {
   const headersList = await headers();
   const host = headersList.get('host')!;
@@ -18,6 +18,8 @@ export const revalidate = 0;
 export default async function RenderDomainPage() {
   const headersList = await headers();
   const host = headersList.get('host')!;
+  
+  // Strip "www." from the domain name if it exists for the database lookup
   const domainName = host.startsWith('www.') ? host.substring(4) : host;
 
   const supabase = createClient(
@@ -32,36 +34,35 @@ export default async function RenderDomainPage() {
     .single();
 
   if (error || !data) {
+    // Updated error page styling to match the dark theme
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-12 font-mono">
-        <div className="w-full max-w-2xl rounded bg-red-100 p-6 text-red-900">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-slate-900 p-8 font-mono text-white">
+        <div className="w-full max-w-2xl rounded-lg bg-red-900/20 p-6 text-center text-red-300 ring-1 ring-red-500/50">
           <h1 className="text-xl font-bold">Error: Domain Not Configured</h1>
           <p className="mt-4">The application tried to look up the following domain:</p>
-          <pre className="mt-2 rounded bg-red-200 p-2"><code>{domainName} (from host: {host})</code></pre>
-          <p className="mt-4">It failed with the following error from the database:</p>
-          <pre className="mt-2 rounded bg-red-200 p-2"><code>{JSON.stringify(error, null, 2) || "No specific error message."}</code></pre>
+          <pre className="mt-2 rounded bg-slate-800 p-2 text-white"><code>{domainName} (from host: {host})</code></pre>
         </div>
       </main>
     );
   }
 
+  // New design for the "For Sale" page
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-12 bg-gray-50 text-center">
-      <div className="w-full max-w-2xl">
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-gray-900">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-900 p-8 text-white">
+      <div className="w-full max-w-3xl text-center">
+        <p className="text-lg font-semibold text-blue-400">This Domain is For Sale</p>
+        <h1 className="mt-4 text-5xl font-bold tracking-tight text-white sm:text-7xl">
           {host}
         </h1>
-        <p className="mt-6 text-lg leading-8 text-gray-600">
-          This domain is for sale.
-        </p>
-        <div className="mt-10">
-          <div className="text-4xl font-bold text-indigo-600">{data.price}</div>
-          <p className="mt-4 text-base font-medium text-gray-500">
-            For inquiries, please contact:
-          </p>
+        <div className="mt-12">
+          <p className="text-xl text-slate-300">Asking Price</p>
+          <p className="mt-2 text-6xl font-extrabold text-blue-400 sm:text-8xl">{data.price}</p>
+        </div>
+        <div className="mt-12">
+          <p className="text-lg text-slate-300">For inquiries, please contact:</p>
           <a
             href={`mailto:${data.contact_email}`}
-            className="text-lg font-semibold text-indigo-600 hover:text-indigo-500"
+            className="mt-2 inline-block text-xl font-semibold text-blue-400 transition hover:text-blue-300"
           >
             {data.contact_email}
           </a>
