@@ -1,13 +1,23 @@
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
+import { Metadata } from 'next';
 
+// This new function sets the page title
+export async function generateMetadata(): Promise<Metadata> {
+  const headersList = await headers();
+  const host = headersList.get('host')!;
+  const domainName = host.startsWith('www.') ? host.substring(4) : host;
+  return {
+    title: `${domainName} - For Sale`,
+  };
+}
+
+// This page will not be cached
 export const revalidate = 0;
 
 export default async function RenderDomainPage() {
   const headersList = await headers();
   const host = headersList.get('host')!;
-  
-  // Strip "www." from the domain name if it exists
   const domainName = host.startsWith('www.') ? host.substring(4) : host;
 
   const supabase = createClient(
