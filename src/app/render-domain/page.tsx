@@ -34,7 +34,6 @@ export default async function RenderDomainPage() {
     .single();
 
   if (error || !data) {
-    // Updated error page styling to match the dark theme
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-slate-900 p-8 font-mono text-white">
         <div className="w-full max-w-2xl rounded-lg bg-red-900/20 p-6 text-center text-red-300 ring-1 ring-red-500/50">
@@ -52,7 +51,7 @@ export default async function RenderDomainPage() {
       <div className="w-full max-w-3xl text-center">
         <p className="text-lg font-semibold text-blue-400">This Domain is For Sale</p>
         <h1 className="mt-4 text-5xl font-bold tracking-tight text-white sm:text-7xl">
-          {host}
+          {domainName}
         </h1>
         <div className="mt-12">
           <p className="text-xl text-slate-300">Asking Price</p>
