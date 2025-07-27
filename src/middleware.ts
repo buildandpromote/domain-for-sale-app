@@ -15,8 +15,8 @@ export const config = {
 export function middleware(req: NextRequest) {
   const url = req.nextUrl;
   const hostname = req.headers.get('host')!;
-  
-  // Handle requests to the admin panel
+
+  // ALWAYS allow requests to the admin panel and handle auth
   if (url.pathname.startsWith('/admin')) {
     const basicAuth = req.headers.get('authorization');
     if (basicAuth) {
@@ -31,13 +31,14 @@ export function middleware(req: NextRequest) {
       headers: { 'WWW-Authenticate': 'Basic realm="Secure Area"' },
     });
   }
-
-  // If the hostname ends with a vercel.app suffix, it's the main app, not a custom domain
-  if (hostname.endsWith('.vercel.app')) {
+  
+  // If the hostname is a Vercel URL or localhost, it's the main app, so let it pass.
+  if (hostname.endsWith('.vercel.app') || hostname.startsWith('localhost')) {
     return NextResponse.next();
   }
 
-  // Otherwise, rewrite to our render page for custom domains
+  // If it's not the admin page and not the main app, it must be a custom domain.
+  // Rewrite to our render page.
   url.pathname = `/render-domain`;
   return NextResponse.rewrite(url);
 }
